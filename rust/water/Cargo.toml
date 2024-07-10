@@ -1,0 +1,9 @@
+[package]
+name = "water"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+notifica = "3.0.2"
+tray-icon = "0.14.3"
