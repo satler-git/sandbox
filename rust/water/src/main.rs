@@ -1,6 +1,6 @@
 use std::{thread::sleep, time::Duration};
 
-use anyhow::{Result};
+use anyhow::Result;
 use tray_icon::{menu, Icon, TrayIconBuilder};
 
 fn water_notify() -> Result<()> {
