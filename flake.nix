@@ -37,7 +37,7 @@
         buildInputs = with pkgs; [
           rust-bin.stable.latest.default
         ] ++ [
-            kani.packages.${system}.kani
+            # kani.packages.${system}.kani
           ];
       };
 
