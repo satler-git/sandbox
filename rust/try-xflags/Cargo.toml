@@ -1,0 +1,11 @@
+[package]
+name = "try-xflags"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+xflags = "0.3.2"
+
+[[bin]]
+name = "succ"
+path = "src/bin/succ.rs"
