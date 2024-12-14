@@ -1,1 +1,2 @@
 - https://github.com/satler-git/sb-nix-hive
+- https://github.com/satler-git/sb-nix-services-flake
