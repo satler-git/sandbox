@@ -16,10 +16,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .global(move |global| {
             let mut guard = globals_clone.lock().unwrap();
             let id = global.id.clone();
-            // TODO: 再帰的にクローンが必要?よくわからん
-            // let props = global.props.clone();
-            // TODO: Audio/Sink Source Device でFilter
-            guard.push(id);
+            // TODO: Source Device でFilter
+            if let Some(d) = global.props {
+                let nick = d.get("node.nick").and_then(|s| Some(s.to_string()));
+                let class = d.get("media.class").and_then(|s| Some(s.to_string()));
+                if nick.is_some() && class.is_some() {
+                    guard.push((id, nick.unwrap(), class.unwrap()));
+                }
+            }
         })
         .register();
 
@@ -40,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut globals = globals.lock().unwrap();
     globals.sort();
 
-    dbg!(globals);
+    drop(dbg!(globals));
 
     Ok(())
 }
