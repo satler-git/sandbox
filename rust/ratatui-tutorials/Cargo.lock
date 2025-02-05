@@ -460,7 +460,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ratatui-tutrials"
+name = "ratatui-tutorials"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
