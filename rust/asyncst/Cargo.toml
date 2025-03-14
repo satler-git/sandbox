@@ -1,0 +1,9 @@
+[package]
+name = "asyncst"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-stream = "0.3.6"
+tokio = { version = "1.44.1", features = ["full"] }
+tokio-stream = "0.1.17"
