@@ -51,6 +51,7 @@ async fn main() -> Result<()> {
                 Viewport::Fullscreen,
                 '>', // Selected
                 ' ',
+                ltrait_ui_tui::sample_keyconfig,
             )),
             |c| TuiEntry {
                 text: (c.into(), Style::new()),
