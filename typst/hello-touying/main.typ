@@ -5,7 +5,7 @@
 
 #show: simple-theme.with(
   aspect-ratio: "16-9",
-  config-common(show-notes-on-second-screen: right)
+  config-common(show-notes-on-second-screen: right),
 )
 
 // https://touying-typ.github.io/docs/start
