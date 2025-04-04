@@ -1,0 +1,12 @@
+version: '3'
+
+vars:
+  NAME: hello-cetz
+
+tasks:
+  compile:
+    cmds:
+      - typst compile ./main.typ ./out/{{ .NAME }}.pdf
+  live:
+    cmds:
+      - typst-live ./main.typ
