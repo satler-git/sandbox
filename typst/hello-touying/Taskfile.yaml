@@ -1,0 +1,17 @@
+version: '3'
+
+vars:
+  NAME: hello-touying
+
+tasks:
+  compile:
+    cmds:
+      - typst compile ./main.typ ./out/{{ .NAME }}.pdf
+  live:
+    cmds:
+      - typst-live ./main.typ
+  present:
+    deps:
+      - task: compile
+    cmds:
+      - pympress ./out/{{ .NAME }}.pdf
