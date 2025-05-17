@@ -1,15 +1,45 @@
+macro_rules! parse_tuple {
+    ($tokens:ident, ($first:ty)) => {
+        ($tokens.next().unwrap().parse::<$first>().unwrap())
+    };
+    ($tokens:ident, ($first:ty, )) => {
+        ($tokens.next().unwrap().parse::<$first>().unwrap(),)
+    };
+    ($tokens:ident, ($first:ty, $second:ty $(,)?)) => {
+        (
+            $tokens.next().unwrap().parse::<$first>().unwrap(),
+            $tokens.next().unwrap().parse::<$second>().unwrap(),
+        )
+    };
+    ($tokens:ident, ($first:ty, $second:ty, $third:ty $(,)?)) => {
+        (
+            $tokens.next().unwrap().parse::<$first>().unwrap(),
+            $tokens.next().unwrap().parse::<$second>().unwrap(),
+            $tokens.next().unwrap().parse::<$third>().unwrap(),
+        )
+    };
+    ($tokens:ident, ($first:ty, $second:ty, $third:ty, $fourd:ty $(,)?)) => {
+        (
+            $tokens.next().unwrap().parse::<$first>().unwrap(),
+            $tokens.next().unwrap().parse::<$second>().unwrap(),
+            $tokens.next().unwrap().parse::<$third>().unwrap(),
+            $tokens.next().unwrap().parse::<$fourd>().unwrap(),
+        )
+    };
+}
+
 macro_rules! query {
     // simple binding
-    ($tokens:expr, $name:ident : $ty:ty $(,)?) => {
+    ($tokens:ident, $name:ident : $ty:ty $(,)?) => {
         let $name = $tokens.next().unwrap().parse::<$ty>().unwrap();
     };
-    ($tokens:expr, $name:ident : $ty:ty , $($rest:tt)*) => {
+    ($tokens:ident, $name:ident : $ty:ty , $($rest:tt)*) => {
         let $name = $tokens.next().unwrap().parse::<$ty>().unwrap();
         query!($tokens , $($rest)*);
     };
     // query bind
     (
-        $tokens:expr,
+        $tokens:ident,
         $name:ident $enum_name:ident : {
              $( $variant:ident : $value:expr => ( $( $field_ty:ty ),* ) ),* $(,)?
         } : $count:expr
@@ -25,7 +55,7 @@ macro_rules! query {
                 $name.push(match _kind {
                     $(
                         $value => $enum_name::$variant(
-                            $( $tokens.next().unwrap().parse::<$field_ty>().unwrap() ),*
+                            $( parse_tuple!($tokens, ($field_ty)) ),*
                         ),
                     )*
                     _ => unimplemented!(),
@@ -35,7 +65,7 @@ macro_rules! query {
         let $name = $name;
     };
     (
-        $tokens:expr,
+        $tokens:ident,
         $name:ident $enum_name:ident : {
              $( $variant:ident : $value:expr => ( $( $field_ty:ty ),* ) ),* $(,)?
         } : $count:expr
@@ -51,7 +81,7 @@ macro_rules! query {
                 $name.push(match _kind {
                     $(
                         $value => $enum_name::$variant(
-                            $( $tokens.next().unwrap().parse::<$field_ty>().unwrap() ),*
+                            $( parse_tuple!($tokens, ($field_ty)) ),*
                         ),
                     )*
                     _ => unimplemented!(),
@@ -63,7 +93,7 @@ macro_rules! query {
         query!($tokens , $($rest)*);
     };
     // 停止
-    ($tokens:expr $(,)?) => {};
+    ($tokens:ident $(,)?) => {};
 }
 
 #[allow(unused)]
