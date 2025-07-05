@@ -1,3 +1,4 @@
+#[macro_export]
 macro_rules! parse_tuple {
     ($tokens:ident, ($first:ty)) => {
         ($tokens.next().unwrap().parse::<$first>().unwrap())
@@ -28,6 +29,7 @@ macro_rules! parse_tuple {
     };
 }
 
+#[macro_export]
 macro_rules! query {
     // simple binding
     ($tokens:ident, $name:ident : $ty:ty $(,)?) => {
