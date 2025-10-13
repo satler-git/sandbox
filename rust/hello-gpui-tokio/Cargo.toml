@@ -1,0 +1,9 @@
+[package]
+name = "hello_gpui_tokio"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+gpui = "0.2.0"
+tokio = { version = "1.47.1", features = ["full"] }
+unicode-segmentation = "1.12.0"
