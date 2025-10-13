@@ -1,3 +1,5 @@
 result
 .lake
 target
+*.pdf
+.direnv/
