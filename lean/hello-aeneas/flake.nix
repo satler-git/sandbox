@@ -34,10 +34,9 @@
 
           rust-bin
         ];
-
-        shellHook = ''
-          ln -sfn "${aeneas}" "./.aeneas" || true
-        '';
+        # shellHook = ''
+        #   ln -sfn "${aeneas}" "./.aeneas" || true
+        # '';
       };
     };
 }
