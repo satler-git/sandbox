@@ -14,9 +14,11 @@ pub enum Arg {
 }
 
 impl EvalPipeline {
-    pub fn eval(buf: &str, args: Vec<Arg>) -> Result<()> {
+    pub fn eval(buf: &str, _args: Vec<Arg>) -> Result<()> {
         let tokens = Tokenizer::tokenize(buf);
         let parsed = Parser::parse(tokens)?;
+
+        dbg!(&parsed);
 
         // evaler
 

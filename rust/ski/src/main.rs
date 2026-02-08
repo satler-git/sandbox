@@ -15,6 +15,7 @@
 * <lambda>
 *
 * f x y = (f x) y
+* $
 *
 * lambda
 *
@@ -37,6 +38,8 @@ use clap::Parser;
 
 use anyhow::Result;
 
+use ski::EvalPipeline;
+
 #[derive(Debug, Parser)]
 struct Args {
     #[arg(short, long)]
@@ -56,6 +59,8 @@ fn main() -> Result<()> {
     } else {
         std::io::read_to_string(std::io::stdin())?
     };
+
+    EvalPipeline::eval(&script, vec![])?;
 
     Ok(())
 }

@@ -15,6 +15,10 @@ pub enum ParseError {
     UnToken,
     #[error("There must be {0}")]
     Token(String),
+    #[error("brackets are not matched")]
+    UnMatchedBrackets,
+    #[error("There is no expr even though there must be")]
+    MustBeExpr,
 }
 
 type Result<T> = std::result::Result<T, ParseError>;
@@ -89,39 +93,119 @@ impl<'a> Parser<'a> {
 
         Ok(File {
             def,
-            expr: parser.parse_expr()?,
+            expr: parser.parse_fun_apply()?,
         })
     }
 
-    fn parse_expr(&mut self) -> Result<Expr<'a>> {
-        Ok(if self.peek() == Some("\\") {
-            let (arg, expr) = self.parse_fun()?;
-            Expr::Fun {
-                arg,
-                expr: Box::new(expr),
+    fn parse_fun_apply(&mut self) -> Result<Expr<'a>> {
+        let mut prev = self.parse_expr()?.ok_or(ParseError::MustBeExpr)?;
+
+        while let Some(next) = self.parse_expr()? {
+            prev = Expr::Apply {
+                fun: Box::new(prev),
+                arg: Box::new(next),
+            };
+        }
+
+        Ok(prev)
+    }
+
+    fn parse_expr(&mut self) -> Result<Option<Expr<'a>>> {
+        Ok(Some(match dbg!(self.peek()) {
+            Some("\\") => {
+                // これは確定だから
+                let (arg, expr) = self.parse_fun()?;
+                Expr::Fun {
+                    arg,
+                    expr: Box::new(expr),
+                }
             }
-        } else {
-            // (), apply, ident
-            todo!()
-        })
+            Some("(") => {
+                // かっこの次がexprならfunc applyにつなげる
+                self.parse_bracket()?
+            }
+            Some("$") => self.parse_daller()?,
+            Some(_) => Expr::Ident(self.parse_ident()?),
+            // func applyの次もexpr?ならまたfunc apply
+            None => return Ok(None),
+        }))
     }
 
     fn parse_def(&mut self) -> Result<Option<(Ident<'a>, Expr<'a>)>> {
-        // defの終わりに終端記号をつけるべき?
         if self.peekn(1) != Some("=") {
+            // このときexpr
             Ok(None)
         } else {
-            let ident = Ident::try_new(self.nexte()?)?;
-            self.nextee("=")?;
-            let expr = self.parse_expr()?;
+            let mut parser = {
+                let mut vec = vec![];
+
+                while self.peek().is_some() && self.peek() != Some(";") {
+                    vec.push(self.next().unwrap());
+                }
+
+                if self.peek() == Some(";") {
+                    let _ = self.next();
+                }
+
+                Parser { vec, pos: 0 }
+            };
+
+            let ident = parser.parse_ident()?;
+            parser.nextee("=")?;
+            let expr = parser.parse_fun_apply()?;
             Ok(Some((ident, expr)))
         }
     }
 
     fn parse_fun(&mut self) -> Result<(Ident<'a>, Expr<'a>)> {
         self.nextee("\\")?;
-        let ident = Ident::try_new(self.nexte()?)?;
-        let expr = self.parse_expr()?;
+        let ident = self.parse_ident()?;
+        let expr = self.parse_fun_apply()?;
         Ok((ident, expr))
+    }
+
+    fn parse_ident(&mut self) -> Result<Ident<'a>> {
+        Ident::try_new(self.nexte()?)
+    }
+
+    fn parse_bracket(&mut self) -> Result<Expr<'a>> {
+        let mut level = 0;
+        let mut ts = vec![];
+
+        loop {
+            match self.next() {
+                Some("(") => {
+                    if level != 0 {
+                        ts.push("(");
+                    }
+
+                    level += 1;
+                }
+                Some(")") => {
+                    level -= 1;
+
+                    if level == 0 {
+                        break;
+                    } else {
+                        ts.push(")")
+                    }
+                }
+                Some(t) => ts.push(t),
+                _ => {
+                    return Err(ParseError::UnMatchedBrackets);
+                }
+            }
+        }
+
+        Parser { pos: 0, vec: ts }.parse_fun_apply()
+    }
+
+    fn parse_daller(&mut self) -> Result<Expr<'a>> {
+        self.nextee("$")?;
+        let mut vec = vec![];
+        while let Some(n) = self.next() {
+            vec.push(n);
+        }
+        Parser { pos: 0, vec }.parse_fun_apply()
     }
 }

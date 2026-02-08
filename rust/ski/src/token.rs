@@ -6,7 +6,7 @@ impl Tokenizer {
         script
             .split_whitespace()
             .flat_map(split_delm)
-            .flat_map(|x| x.split('.'))
+            .flat_map(|x| x.split_terminator('.'))
             .collect()
     }
 }
@@ -16,7 +16,7 @@ struct SplitDelm<'a> {
     next: usize,
 }
 
-const SPLIT_AT: [&str; 3] = ["(", ")", "\\"];
+const SPLIT_AT: [&str; 5] = ["(", ")", "\\", ";", "$"];
 
 impl<'a> Iterator for SplitDelm<'a> {
     type Item = &'a str;
@@ -28,12 +28,12 @@ impl<'a> Iterator for SplitDelm<'a> {
             None
         } else if SPLIT_AT.contains(&&self.s[now_next..=now_next]) {
             self.next += 1;
-            Some(&&self.s[now_next..=now_next])
+            Some(&self.s[now_next..=now_next])
         } else {
             while self.next < self.s.len() && !SPLIT_AT.contains(&&self.s[self.next..=self.next]) {
                 self.next += 1;
             }
-            Some(&&self.s[now_next..self.next])
+            Some(&self.s[now_next..self.next])
         }
     }
 }
