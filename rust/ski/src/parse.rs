@@ -15,6 +15,8 @@ pub enum ParseError {
     UnToken,
     #[error("There must be {0}")]
     Token(String),
+    #[error("brackets are not matched")]
+    UnMatchedBrackets,
 }
 
 type Result<T> = std::result::Result<T, ParseError>;
@@ -94,15 +96,23 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_expr(&mut self) -> Result<Expr<'a>> {
-        Ok(if self.peek() == Some("\\") {
-            let (arg, expr) = self.parse_fun()?;
-            Expr::Fun {
-                arg,
-                expr: Box::new(expr),
+        Ok(match self.peek() {
+            Some("\\") => {
+                // これは確定だから
+                let (arg, expr) = self.parse_fun()?;
+                Expr::Fun {
+                    arg,
+                    expr: Box::new(expr),
+                }
             }
-        } else {
-            // (), apply, ident
-            todo!()
+            Some("(") => {
+                // かっこの次がexprならfunc applyにつなげる
+                todo!()
+            }
+            // func applyの次もexpr?ならまたfunc apply
+            _ => {
+                todo!()
+            }
         })
     }
 
@@ -123,5 +133,40 @@ impl<'a> Parser<'a> {
         let ident = Ident::try_new(self.nexte()?)?;
         let expr = self.parse_expr()?;
         Ok((ident, expr))
+    }
+
+    fn parse_bracket(&mut self) -> Result<Expr<'a>> {
+        let mut level: usize = 0;
+        let mut ts = vec![];
+
+        loop {
+            match self.peek() {
+                Some("(") => {
+                    if level != 0 {
+                        ts.push("(");
+                    }
+
+                    level += 1;
+                }
+                Some(")") => {
+                    let Some(levelt) = level.checked_sub(1) else {
+                        return Err(ParseError::UnMatchedBrackets);
+                    };
+                    level = levelt;
+
+                    if level == 0 {
+                        break;
+                    } else {
+                        ts.push(")")
+                    }
+                }
+                Some(t) => ts.push(t),
+                _ => {
+                    return Err(ParseError::UnMatchedBrackets);
+                }
+            }
+        }
+
+        Self { pos: 0, vec: ts }.parse_expr()
     }
 }
