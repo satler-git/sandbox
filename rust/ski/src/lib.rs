@@ -1,27 +1,20 @@
 use anyhow::Result;
 
-use crate::{parse::Parser, token::Tokenizer};
+use crate::{eval::Value, parse::Parser, token::Tokenizer};
 
+mod eval;
 mod parse;
 mod token;
 
-#[derive(Debug, Default)]
 pub struct EvalPipeline;
 
-#[derive(Debug)]
-pub enum Arg {
-    V,
-}
-
 impl EvalPipeline {
-    pub fn eval(buf: &str, _args: Vec<Arg>) -> Result<()> {
+    pub fn eval<T>(buf: &str, args: Vec<Value<T>>) -> Result<Value<T>> {
         let tokens = Tokenizer::tokenize(buf);
         let parsed = Parser::parse(tokens)?;
 
         dbg!(&parsed);
 
-        // evaler
-
-        Ok(())
+        Ok(eval::Evaluator::eval(parsed, args))
     }
 }

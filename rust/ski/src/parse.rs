@@ -42,8 +42,8 @@ enum Expr<'a> {
     Ident(Ident<'a>),
 }
 
-#[derive(Debug)]
-struct Ident<'a>(&'a str);
+#[derive(Debug, Hash)]
+pub struct Ident<'a>(&'a str);
 
 impl<'a> Ident<'a> {
     fn try_new(ident: &'a str) -> Result<Self> {
